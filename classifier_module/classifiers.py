@@ -42,7 +42,7 @@ class SKlearnHelper(object):
 # Put in our parameters for said classifiers
 # Random Forest parameters
 class stacker():
-    def __initi__(self):
+    def __init__(self):
         rf_params = {
             'n_jobs': -1,
             'n_estimators': 500,
@@ -92,6 +92,7 @@ class stacker():
         self.gb = SKlearnHelper(clf=GradientBoostingClassifier, seed=SEED, params=gb_params)
         self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
 
+    # TODO: k-fold by era not target
     def stacking(self, X, y, X_holdout, y_holdout):
         n_splits = 5
         base_models = [self.rf, self.et, self.ada, self.gb, self.svc]
