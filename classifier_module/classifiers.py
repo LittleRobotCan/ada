@@ -42,7 +42,7 @@ class SKlearnHelper(object):
 # Put in our parameters for said classifiers
 # Random Forest parameters
 class stacker():
-    def __init__(self):
+    def __init__(self, data, test_size):
         rf_params = {
             'n_jobs': -1,
             'n_estimators': 500,
@@ -92,21 +92,36 @@ class stacker():
         self.gb = SKlearnHelper(clf=GradientBoostingClassifier, seed=SEED, params=gb_params)
         self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
 
-    # TODO: k-fold by era not target
+        # get the era value for splitting
+        self.era = data['era'].tolist()
+        self.n_splits = 10
+
+    def split_by_era(self):
+        era_set = list(set(self.era))
+        splits = []
+        kf = KFold(n_splits=self.n_splits, shuffle=True)
+        for _, test_index in kf.split(era_set):
+            test_era = [era_set[i] for i in test_index]
+            train_era = [era for era in era_set if era not in test_era]
+            test_index = [i for i in range(len(self.era)) if self.era[i] in test_era]
+            train_index = [i for i in range(len(self.era)) if self.era[i] in train_era]
+            splits.append({'test':test_index, 'train':train_index})
+        return splits
+
     def stacking(self, X, y, X_holdout, y_holdout):
         n_splits = 5
         base_models = [self.rf, self.et, self.ada, self.gb, self.svc]
         stacks = []
-        kf = KFold(n_splits=n_splits)
+        splits = self.split_by_era()
         holdout_matrix = []
         for model in base_models:
             X_stack = np.zeros((len(X)))
             holdout_col = []
-            for train_index, test_index in kf.split(X):
-                X_train, X_test = X[train_index], X[test_index]
-                y_train = y[train_index]
+            for index in splits:
+                X_train, X_test = X[index['train']], X[index['test']]
+                y_train = y[index['train']]
                 model.fit(X_train, y_train)
-                X_stack[test_index] = model.predict(X_test)
+                X_stack[index['test']] = model.predict(X_test)
                 holdout_col.extend(model.predict(X_holdout))
             stacks.append(X_stack)
             holdout_matrix.append(holdout_col)
@@ -118,20 +133,21 @@ class stacker():
         holdout_df['labels'] = y_holdout*n_splits
         return stacks_df, holdout_df
 
-    def second_learning(self, stacks_df):
-        X, y = prep_matrix(stacks_df)
-        gbm = xgb.XGBClassifier(        # learning_rate = 0.02,
-            n_estimators=2000,
-            max_depth=4,
-            min_child_weight=2,
-            # gamma=1,
-            gamma=0.9,
-            subsample=0.8,
-            colsample_bytree=0.8,
-            objective='binary:logistic',
-            nthread=-1,
-            scale_pos_weight=1).fit(X, y)
-        return gbm
+
+def second_learning(self, stacks_df):
+    X, y = prep_matrix(stacks_df)
+    gbm = xgb.XGBClassifier(        # learning_rate = 0.02,
+        n_estimators=2000,
+        max_depth=4,
+        min_child_weight=2,
+        # gamma=1,
+        gamma=0.9,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        objective='binary:logistic',
+        nthread=-1,
+        scale_pos_weight=1).fit(X, y)
+    return gbm
 
 
 if __name__ == '__main__':
