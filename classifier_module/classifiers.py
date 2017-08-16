@@ -30,7 +30,13 @@ class SKlearnHelper(object):
         try:
             return self.clf.predict(x)
         except:
-            print "nomodel is not fitted yet"
+            print "model is not fitted"
+
+    def predict_proba(self, x):
+        try:
+            return self.clf.predict_prob(x)
+        except:
+            print "model not fitted"
 
     def fit(self, x, y):
         self.clf.fit(x,y)
@@ -53,7 +59,10 @@ def split_by_era(eras, n_splits):
 
 
 # TODO: svc predicting all "0" in base learner
-# TODO: predict proba instead of actual predictions
+# TODO: predict proba instead of actual predictions for base output
+# TODO: live data shouldn't have 10 different folds
+# TODO: compare logloss against a random forest model
+# TODO: NN feature engineering
 class base_learner():
     def __init__(self):
         rf_params = {
@@ -120,9 +129,9 @@ class base_learner():
                 X_train, X_test = X[index['train']], X[index['test']]
                 y_train = y[index['train']]
                 model.fit(X_train, y_train)
-                X_stack[index['test']] = model.predict(X_test)
-                holdout_col.extend(model.predict(X_holdout))
-                live_col.extend(model.predict(X_live))
+                X_stack[index['test']] = model.predict_proba(X_test)
+                holdout_col.extend(model.predict_proba(X_holdout))
+                live_col.extend(model.predict_proba(X_live))
             stacks.append(X_stack)
             holdout_matrix.append(holdout_col)
             live_matrix.append(live_col)
