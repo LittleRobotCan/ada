@@ -34,7 +34,7 @@ class SKlearnHelper(object):
 
     def predict_proba(self, x):
         try:
-            return self.clf.predict_prob(x)
+            return self.clf.predict_proba(x)
         except:
             print "model not fitted"
 
