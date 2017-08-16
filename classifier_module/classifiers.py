@@ -105,7 +105,7 @@ class base_learner():
         self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
 
     def stacking(self, X, y, X_holdout, y_holdout, splits):
-        base_models = [self.rf, self.et, self.ada, self.gb, self.svc]
+        base_models = [self.rf, self.et, self.ada, self.gb]
         stacks = []
         holdout_matrix = []
         for model in base_models:
@@ -122,10 +122,10 @@ class base_learner():
             stacks.append(X_stack)
             holdout_matrix.append(holdout_col)
         stacks_data = np.array(stacks).transpose()
-        stacks_df = pd.DataFrame(stacks_data, columns = ['rf', 'et', 'ada', 'gb', 'svc'])
+        stacks_df = pd.DataFrame(stacks_data, columns = ['rf', 'et', 'ada', 'gb'])
         stacks_df['labels'] = y
         holdout_data = np.array(holdout_matrix).transpose()
-        holdout_df = pd.DataFrame(holdout_data, columns = ['rf', 'et', 'ada', 'gb', 'svc'])
+        holdout_df = pd.DataFrame(holdout_data, columns = ['rf', 'et', 'ada', 'gb'])
         holdout_df['labels'] = list(y_holdout)*len(splits)
         return stacks_df, holdout_df
 
@@ -163,4 +163,5 @@ if __name__ == '__main__':
     gbm = top_learner(stacks_df)
     X_test, y_test = prep_matrix(holdout_df)
     predictions = gbm.predict(X_test)
+
     print "finished"
