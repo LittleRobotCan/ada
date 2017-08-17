@@ -174,14 +174,24 @@ if __name__ == '__main__':
     import pickle
 
     n_splits = 10
-
-    data = read_csv('data/numerai_training_data.csv')
-    #data = raw_data.sample(100)
+    """
+    DEBUGGING
+    """
+    data_raw = read_csv('data/numerai_training_data.csv')
+    data = data_raw.sample(100)
     t_data = read_csv('data/numerai_tournament_data.csv')
-    holdout = t_data[t_data['data_type']=='validation']
-    live = t_data[t_data['data_type']=='live']
-    #holdout = holdout_raw.sample(100)
-    #live = live_raw.sample(100)
+    holdout_raw = t_data[t_data['data_type']=='validation']
+    live_raw = t_data[t_data['data_type']=='live']
+    holdout = holdout_raw.sample(100)
+    live = live_raw.sample(100)
+
+    """
+    RUNNING
+    """
+    # data = read_csv('data/numerai_training_data.csv')
+    # t_data = read_csv('data/numerai_tournament_data.csv')
+    # holdout = t_data[t_data['data_type']=='validation']
+    # live = t_data[t_data['data_type']=='live']
 
     X, y = prep_matrix(data.ix[:,3:])
     X_holdout, y_holdout = prep_matrix(holdout.ix[:,3:])
