@@ -114,41 +114,36 @@ class base_learner():
         self.gb = SKlearnHelper(clf=GradientBoostingClassifier, seed=SEED, params=gb_params)
         self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
 
-    def stacking(self, X, y, X_holdout, y_holdout, X_live, y_live, splits):
-        base_models = [self.rf, self.et, self.ada, self.gb]
-        stacks = []
-        holdout_matrix = []
-        live_matrix = []
-        for model in base_models:
-            print "model"
+    def stacking(self, X, y, X_holdout, y_holdout, splits):
+        base_models = {'rf':self.rf, 'et':self.et, 'ada':self.ada, 'gb':self.gb}
+        models_names = ['rf', 'et', 'ada', 'gb']
+        train_meta = pd.DataFrame(data=None, columns=['rf', 'et', 'ada', 'gb'])
+        # get the base predictions and make a meta feature matrix
+        for name in models_names:
+            print name
+            model = base_models[name]
             X_stack = np.zeros((len(X)))
-            holdout_col = []
-            live_col = []
             for index in splits:
                 print "split"
                 X_train, X_test = X[index['train']], X[index['test']]
                 y_train = y[index['train']]
                 model.fit(X_train, y_train)
-                X_stack[index['test']] = model.predict_proba(X_test)
-                holdout_col.extend(model.predict_proba(X_holdout))
-                live_col.extend(model.predict_proba(X_live))
-            stacks.append(X_stack)
-            holdout_matrix.append(holdout_col)
-            live_matrix.append(live_col)
-        stacks_data = np.array(stacks).transpose()
-        stacks_df = pd.DataFrame(stacks_data, columns = ['rf', 'et', 'ada', 'gb'])
-        stacks_df['labels'] = y
-        holdout_data = np.array(holdout_matrix).transpose()
-        live_data = np.array(live_matrix).transpose()
-        holdout_df = pd.DataFrame(holdout_data, columns = ['rf', 'et', 'ada', 'gb'])
-        live_df = pd.DataFrame(live_data, columns = ['rf', 'et', 'ada', 'gb'])
-        holdout_df['labels'] = list(y_holdout)*len(splits)
-        live_df['labels'] = 'unkonwn'
-        return stacks_df, holdout_df, live_df
+                X_stack[index['test']] = model.predict(X_test)
+            train_meta[name] = list(X_stack)
+        train_meta['labels'] = y
+        # get the predictions on the holdout set
+        holdout_meta = pd.DataFrame(data=None, columns=['rf', 'et', 'ada', 'gb'])
+        for name in models_names:
+            print name
+            model = base_models[name]
+            model.fit(X, y)
+            holdout_meta[name] = list(X_holdout)
+        holdout_meta['labels'] = y_holdout
+        return train_meta, holdout_meta
 
 
-def top_learner(stacks_df):
-    X, y = prep_matrix(stacks_df)
+def top_learner(train_meta):
+    X, y = prep_matrix(train_meta)
     gbm = XGBClassifier(
         # learning_rate = 0.02,
         n_estimators=2000,
@@ -178,10 +173,10 @@ if __name__ == '__main__':
     DEBUGGING
     """
     data_raw = read_csv('data/numerai_training_data.csv')
-    data = data_raw.sample(100)
     t_data = read_csv('data/numerai_tournament_data.csv')
     holdout_raw = t_data[t_data['data_type']=='validation']
     live_raw = t_data[t_data['data_type']=='live']
+    data = data_raw.sample(100)
     holdout = holdout_raw.sample(100)
     live = live_raw.sample(100)
 
@@ -195,22 +190,21 @@ if __name__ == '__main__':
 
     X, y = prep_matrix(data.ix[:,3:])
     X_holdout, y_holdout = prep_matrix(holdout.ix[:,3:])
-    X_live, y_live = prep_matrix(live.ix[:,3:])
+    #X_live, y_live = prep_matrix(live.ix[:,3:])
 
     eras = data['era'].tolist()
     splits = split_by_era(eras, n_splits)
     stack = base_learner()
-    stacks_df, holdout_df, live_df = stack.stacking(X, y, X_holdout, y_holdout, X_live, y_live, splits)
-    gbm = top_learner(stacks_df)
-    X_test, y_test = prep_matrix(holdout_df)
-    cv_predictions = gbm.predict_proba(X_test)
-    l_loss = log_loss(y_test, cv_predictions)
+    train_meta, holdout_meta = stack.stacking(X, y, X_holdout, y_holdout, splits)
+    gbm = top_learner(train_meta)
+    X_holdout_meta, y_holdout_meta = prep_matrix(holdout_meta)
+    cv_predictions = gbm.predict_proba(X_holdout_meta)
+    l_loss = log_loss(y_holdout_meta, cv_predictions)
 
     print l_loss
 
-    holdout_df.to_csv('output/holdout_df.csv')
-    live_df.to_csv('output/live_df.csv')
-    stacks_df.to_csv('output/stacks_df.csv')
+    train_meta.to_csv('output/train_meta.csv')
+    holdout_meta.to_csv('output/holdout_meta.csv')
 
     cv = [gbm, cv_predictions, l_loss]
     f = open('output/cv.pickle', 'w')
