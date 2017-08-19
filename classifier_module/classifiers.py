@@ -137,7 +137,7 @@ class base_learner():
             print name
             model = base_models[name]
             model.fit(X, y)
-            holdout_meta[name] = list(X_holdout)
+            holdout_meta[name] = list(model.predict(X_holdout))
         holdout_meta['labels'] = y_holdout
         return train_meta, holdout_meta
 
@@ -172,21 +172,21 @@ if __name__ == '__main__':
     """
     DEBUGGING
     """
-    data_raw = read_csv('data/numerai_training_data.csv')
-    t_data = read_csv('data/numerai_tournament_data.csv')
-    holdout_raw = t_data[t_data['data_type']=='validation']
-    live_raw = t_data[t_data['data_type']=='live']
-    data = data_raw.sample(100)
-    holdout = holdout_raw.sample(100)
-    live = live_raw.sample(100)
+    # data_raw = read_csv('data/numerai_training_data.csv')
+    # t_data = read_csv('data/numerai_tournament_data.csv')
+    # holdout_raw = t_data[t_data['data_type']=='validation']
+    # live_raw = t_data[t_data['data_type']=='live']
+    # data = data_raw.sample(100)
+    # holdout = holdout_raw.sample(100)
+    # live = live_raw.sample(100)
 
     """
     RUNNING
     """
-    # data = read_csv('data/numerai_training_data.csv')
-    # t_data = read_csv('data/numerai_tournament_data.csv')
-    # holdout = t_data[t_data['data_type']=='validation']
-    # live = t_data[t_data['data_type']=='live']
+    data = read_csv('data/numerai_training_data.csv')
+    t_data = read_csv('data/numerai_tournament_data.csv')
+    holdout = t_data[t_data['data_type']=='validation']
+    #live = t_data[t_data['data_type']=='live']
 
     X, y = prep_matrix(data.ix[:,3:])
     X_holdout, y_holdout = prep_matrix(holdout.ix[:,3:])
