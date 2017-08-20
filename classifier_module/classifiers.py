@@ -64,6 +64,7 @@ def split_by_era(eras, n_splits):
 # TODO: RBM feature engineering
 # TODO: test whether base models are different enough
 # TODO: use different base models ... classification, cluster, D-reduction, regression
+# taking out ada, gb, and svc for the time being
 class base_learner():
     def __init__(self):
         rf_params = {
@@ -116,9 +117,9 @@ class base_learner():
         self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
 
     def stacking(self, X, y, X_holdout, y_holdout, splits):
-        base_models = {'rf':self.rf, 'et':self.et, 'ada':self.ada, 'gb':self.gb}
+        base_models = {'rf':self.rf, 'et':self.et}
         models_names = ['rf', 'et', 'ada', 'gb']
-        train_meta = pd.DataFrame(data=None, columns=['rf', 'et', 'ada', 'gb'])
+        train_meta = pd.DataFrame(data=None, columns=['rf', 'et'])
         # get the base predictions and make a meta feature matrix
         for name in models_names:
             print name
@@ -129,19 +130,20 @@ class base_learner():
                 X_train, X_test = X[index['train']], X[index['test']]
                 y_train = y[index['train']]
                 model.fit(X_train, y_train)
-                # X_stack[index['test']] = model.predict(X_test)
                 probabilities = model.predict_proba(X_test)
                 probability = [i[1] for i in probabilities]
                 X_stack[index['test']] = probability
             train_meta[name] = list(X_stack)
         train_meta['labels'] = y
         # get the predictions on the holdout set
-        holdout_meta = pd.DataFrame(data=None, columns=['rf', 'et', 'ada', 'gb'])
+        holdout_meta = pd.DataFrame(data=None, columns=['rf', 'et'])
         for name in models_names:
             print name
             model = base_models[name]
             model.fit(X, y)
-            holdout_meta[name] = list(model.predict(X_holdout))
+            probabilities = model.predict_proba(X_holdout)
+            probability = [i[1] for i in probabilities]
+            holdout_meta[name] = probability
         holdout_meta['labels'] = y_holdout
         return train_meta, holdout_meta
 
@@ -176,20 +178,20 @@ if __name__ == '__main__':
     """
     DEBUGGING
     """
-    data_raw = read_csv('data/numerai_training_data.csv')
-    t_data = read_csv('data/numerai_tournament_data.csv')
-    holdout_raw = t_data[t_data['data_type']=='validation']
-    live_raw = t_data[t_data['data_type']=='live']
-    data = data_raw.sample(100)
-    holdout = holdout_raw.sample(100)
-    live = live_raw.sample(100)
+    # data_raw = read_csv('data/numerai_training_data.csv')
+    # t_data = read_csv('data/numerai_tournament_data.csv')
+    # holdout_raw = t_data[t_data['data_type']=='validation']
+    # live_raw = t_data[t_data['data_type']=='live']
+    # data = data_raw.sample(100)
+    # holdout = holdout_raw.sample(100)
+    # live = live_raw.sample(100)
 
     """
     RUNNING
     """
-    # data = read_csv('data/numerai_training_data.csv')
-    # t_data = read_csv('data/numerai_tournament_data.csv')
-    # holdout = t_data[t_data['data_type']=='validation']
+    data = read_csv('data/numerai_training_data.csv')
+    t_data = read_csv('data/numerai_tournament_data.csv')
+    holdout = t_data[t_data['data_type']=='validation']
     #live = t_data[t_data['data_type']=='live']
 
     X, y = prep_matrix(data.ix[:,3:])
