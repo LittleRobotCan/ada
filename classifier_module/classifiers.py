@@ -60,9 +60,10 @@ def split_by_era(eras, n_splits):
 
 # TODO: svc predicting all "0" in base learner
 # TODO: predict proba instead of actual predictions for base output
-# TODO: live data shouldn't have 10 different folds
-# TODO: compare logloss against a random forest model
-# TODO: NN feature engineering
+# TODO: compare logloss against tha of a random forest model
+# TODO: RBM feature engineering
+# TODO: test whether base models are different enough
+# TODO: use different base models ... classification, cluster, D-reduction, regression
 class base_learner():
     def __init__(self):
         rf_params = {
@@ -128,7 +129,10 @@ class base_learner():
                 X_train, X_test = X[index['train']], X[index['test']]
                 y_train = y[index['train']]
                 model.fit(X_train, y_train)
-                X_stack[index['test']] = model.predict(X_test)
+                # X_stack[index['test']] = model.predict(X_test)
+                probabilities = model.predict_proba(X_test)
+                probability = [i[1] for i in probabilities]
+                X_stack[index['test']] = probability
             train_meta[name] = list(X_stack)
         train_meta['labels'] = y
         # get the predictions on the holdout set
@@ -172,20 +176,20 @@ if __name__ == '__main__':
     """
     DEBUGGING
     """
-    # data_raw = read_csv('data/numerai_training_data.csv')
-    # t_data = read_csv('data/numerai_tournament_data.csv')
-    # holdout_raw = t_data[t_data['data_type']=='validation']
-    # live_raw = t_data[t_data['data_type']=='live']
-    # data = data_raw.sample(100)
-    # holdout = holdout_raw.sample(100)
-    # live = live_raw.sample(100)
+    data_raw = read_csv('data/numerai_training_data.csv')
+    t_data = read_csv('data/numerai_tournament_data.csv')
+    holdout_raw = t_data[t_data['data_type']=='validation']
+    live_raw = t_data[t_data['data_type']=='live']
+    data = data_raw.sample(100)
+    holdout = holdout_raw.sample(100)
+    live = live_raw.sample(100)
 
     """
     RUNNING
     """
-    data = read_csv('data/numerai_training_data.csv')
-    t_data = read_csv('data/numerai_tournament_data.csv')
-    holdout = t_data[t_data['data_type']=='validation']
+    # data = read_csv('data/numerai_training_data.csv')
+    # t_data = read_csv('data/numerai_tournament_data.csv')
+    # holdout = t_data[t_data['data_type']=='validation']
     #live = t_data[t_data['data_type']=='live']
 
     X, y = prep_matrix(data.ix[:,3:])
