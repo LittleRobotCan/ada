@@ -64,7 +64,6 @@ def split_by_era(eras, n_splits):
 # TODO: RBM feature engineering
 # TODO: test whether base models are different enough
 # TODO: use different base models ... classification, cluster, D-reduction, regression
-# taking out ada, gb, and svc for the time being
 class base_learner():
     def __init__(self):
         rf_params = {
@@ -117,9 +116,9 @@ class base_learner():
         self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
 
     def stacking(self, X, y, X_holdout, y_holdout, splits):
-        base_models = {'rf':self.rf, 'et':self.et}
+        base_models = {'rf':self.rf, 'et':self.et, 'ada':self.ada, 'gb':self.gb}
         models_names = ['rf', 'et', 'ada', 'gb']
-        train_meta = pd.DataFrame(data=None, columns=['rf', 'et'])
+        train_meta = pd.DataFrame(data=None, columns=['rf', 'et', 'ada', 'gb'])
         # get the base predictions and make a meta feature matrix
         for name in models_names:
             print name
@@ -136,7 +135,7 @@ class base_learner():
             train_meta[name] = list(X_stack)
         train_meta['labels'] = y
         # get the predictions on the holdout set
-        holdout_meta = pd.DataFrame(data=None, columns=['rf', 'et'])
+        holdout_meta = pd.DataFrame(data=None, columns=['rf', 'et', 'ada', 'gb'])
         for name in models_names:
             print name
             model = base_models[name]
