@@ -60,10 +60,11 @@ def split_by_era(eras, n_splits):
 
 # TODO: svc predicting all "0" in base learner
 # TODO: predict proba instead of actual predictions for base output
-# TODO: compare logloss against tha of a random forest model
+# TODO: compare logloss against that of a random forest model
 # TODO: RBM feature engineering
 # TODO: test whether base models are different enough
 # TODO: use different base models ... classification, cluster, D-reduction, regression
+# TODO: plot learning curves and determine optimal cutoff
 class base_learner():
     def __init__(self):
         rf_params = {
@@ -167,6 +168,66 @@ def top_learner(train_meta):
 def evaluate(truth, predict_proba):
     l_loss = log_loss(truth, predict_proba)
     return l_loss
+
+
+class single_learners():
+    def __init__(self):
+        rf_params = {
+            'n_jobs': -1,
+            'n_estimators': 500,
+             'warm_start': True,
+             #'max_features': 0.2,
+            'max_depth': 6,
+            'min_samples_leaf': 2,
+            'max_features' : 'sqrt',
+            'verbose': 0
+        }
+
+        # Extra Trees Parameters
+        et_params = {
+            'n_jobs': -1,
+            'n_estimators':500,
+            #'max_features': 0.5,
+            'max_depth': 8,
+            'min_samples_leaf': 2,
+            'verbose': 0
+        }
+
+        # AdaBoost parameters
+        ada_params = {
+            'n_estimators': 500,
+            'learning_rate' : 0.75
+        }
+
+        # Gradient Boosting parameters
+        gb_params = {
+            'n_estimators': 500,
+             #'max_features': 0.2,
+            'max_depth': 5,
+            'min_samples_leaf': 2,
+            'verbose': 0
+        }
+
+        # Support Vector Classifier parameters
+        svc_params = {
+            'kernel' : 'linear',
+            'C' : 0.025
+            }
+
+        SEED = 0 # for reproducibility
+        self.rf = SKlearnHelper(clf=RandomForestClassifier, seed=SEED, params=rf_params)
+        self.et = SKlearnHelper(clf=ExtraTreesClassifier, seed=SEED, params=et_params)
+        self.ada = SKlearnHelper(clf=AdaBoostClassifier, seed=SEED, params=ada_params)
+        self.gb = SKlearnHelper(clf=GradientBoostingClassifier, seed=SEED, params=gb_params)
+        self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
+
+    def single_learner(self, X, y, X_holdout, y_holdout, model_name):
+        base_models = {'rf': self.rf, 'et': self.et, 'ada': self.ada, 'gb': self.gb}
+        model = base_models[model_name]
+        model.fit(X, y)
+        proba_predictions = model.predict_proba(X_holdout)
+        l_loss = log_loss(y_holdout, proba_predictions)
+        return l_loss
 
 
 if __name__ == '__main__':
