@@ -60,9 +60,11 @@ def split_by_era(eras, n_splits):
 
 # TODO: svc predicting all "0" in base learner
 # TODO: predict proba instead of actual predictions for base output
+# DONE
 # TODO: compare logloss against that of a random forest model
 # TODO: RBM feature engineering
 # TODO: test whether base models are different enough
+# DONE base model correlation low
 # TODO: use different base models ... classification, cluster, D-reduction, regression
 # TODO: plot learning curves and determine optimal cutoff
 class base_learner():
