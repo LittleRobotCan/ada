@@ -260,6 +260,9 @@ if __name__ == '__main__':
     X_holdout, y_holdout = prep_matrix(holdout.ix[:,3:])
     #X_live, y_live = prep_matrix(live.ix[:,3:])
 
+    """
+    multi-learners
+    """
     eras = data['era'].tolist()
     splits = split_by_era(eras, n_splits)
     stack = base_learner()
@@ -280,3 +283,9 @@ if __name__ == '__main__':
     f.close()
 
     print "finished"
+
+    """
+    single learner
+    """
+    single_learner = single_learners()
+    single_learner.single_learner(X, y, X_holdout, y_holdout, 'rf')
