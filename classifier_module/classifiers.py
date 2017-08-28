@@ -259,33 +259,35 @@ if __name__ == '__main__':
     X, y = prep_matrix(data.ix[:,3:])
     X_holdout, y_holdout = prep_matrix(holdout.ix[:,3:])
     #X_live, y_live = prep_matrix(live.ix[:,3:])
-
-    """
-    multi-learners
-    """
-    eras = data['era'].tolist()
-    splits = split_by_era(eras, n_splits)
-    stack = base_learner()
-    train_meta, holdout_meta = stack.stacking(X, y, X_holdout, y_holdout, splits)
-    gbm = top_learner(train_meta)
-    X_holdout_meta, y_holdout_meta = prep_matrix(holdout_meta)
-    cv_predictions = gbm.predict_proba(X_holdout_meta)
-    l_loss = log_loss(y_holdout_meta, cv_predictions)
-
-    print l_loss
-
-    train_meta.to_csv('output/train_meta.csv')
-    holdout_meta.to_csv('output/holdout_meta.csv')
-
-    cv = [gbm, cv_predictions, l_loss]
-    f = open('output/cv.pickle', 'w')
-    pickle.dump(cv, f)
-    f.close()
-
-    print "finished"
+    #
+    # """
+    # multi-learners
+    # """
+    # eras = data['era'].tolist()
+    # splits = split_by_era(eras, n_splits)
+    # stack = base_learner()
+    # train_meta, holdout_meta = stack.stacking(X, y, X_holdout, y_holdout, splits)
+    # gbm = top_learner(train_meta)
+    # X_holdout_meta, y_holdout_meta = prep_matrix(holdout_meta)
+    # cv_predictions = gbm.predict_proba(X_holdout_meta)
+    # l_loss = log_loss(y_holdout_meta, cv_predictions)
+    #
+    # print l_loss
+    #
+    # train_meta.to_csv('output/train_meta.csv')
+    # holdout_meta.to_csv('output/holdout_meta.csv')
+    #
+    # cv = [gbm, cv_predictions, l_loss]
+    # f = open('output/cv.pickle', 'w')
+    # pickle.dump(cv, f)
+    # f.close()
+    #
+    # print "finished"
 
     """
     single learner
     """
-    single_learner = single_learners()
-    single_learner.single_learner(X, y, X_holdout, y_holdout, 'rf')
+    for model_name in ['gb']:
+        single_learner = single_learners()
+        log_loss = single_learner.single_learner(X, y, X_holdout, y_holdout, model_name)
+        print model_name, log_loss
