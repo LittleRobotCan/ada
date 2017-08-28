@@ -62,6 +62,7 @@ def split_by_era(eras, n_splits):
 # TODO: predict proba instead of actual predictions for base output
 # DONE
 # TODO: compare logloss against that of a random forest model
+# DONE
 # TODO: RBM feature engineering
 # TODO: test whether base models are different enough
 # DONE base model correlation low
