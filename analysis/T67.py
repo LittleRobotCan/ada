@@ -36,3 +36,5 @@ array([[ 1.        ,  0.78937079,  0.49843242,  0.34426891],
        [ 0.49843242,  0.40620843,  1.        ,  0.43602881],
        [ 0.34426891,  0.28949447,  0.43602881,  1.        ]])
 """
+
+# TODO: correlation on the prediction outcomes of the learners. Similar vs disimilar groups of predictions

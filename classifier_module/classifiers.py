@@ -68,6 +68,7 @@ def split_by_era(eras, n_splits):
 # DONE base model correlation low
 # TODO: use different base models ... classification, cluster, D-reduction, regression
 # TODO: plot learning curves and determine optimal cutoff
+# TODO: convert binary response to a factor
 class base_learner():
     def __init__(self):
         rf_params = {
