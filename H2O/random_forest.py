@@ -3,7 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold
 import pandas as pd
 from sklearn.metrics import log_loss
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import log_loss
@@ -79,6 +79,17 @@ rf_grid_params_2 = {
     'verbose': [True]
 }
 
+rf_random_params = {
+    'n_jobs': [-1],
+    'n_estimators': np.random.randint(40, 1000, 900),
+    'warm_start': [True],
+    'random_state': [0],
+    'max_depth': [6],
+    'min_samples_leaf': np.random.randint(2,500,400),
+    'max_features': np.random.randint(3,21,18),
+    'verbose': [True]
+}
+
 if __name__ == '__main__':
     from pandas import read_csv
 
@@ -143,3 +154,10 @@ if __name__ == '__main__':
     proba_predictions = best_rf_2.predict_proba(X_holdout)
     l_loss = log_loss(y_holdout, proba_predictions)
     print l_loss
+
+    """
+    RANDOM SEARCH 1
+    """
+    rf = RandomForestClassifier()
+    clf_rand = RandomizedSearchCV(rf, param_distributions=rf_random_params, n_iter=100)
+    clf_rand.fit(X, y)
