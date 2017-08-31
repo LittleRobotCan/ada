@@ -18,6 +18,8 @@ def prep_matrix(data):
     return X, y
 
 
+
+# TODO: use different random states for each model in ensemble
 class SKlearnHelper(object):
     def __init__(self, clf, seed=0, params=None):
         params['random_state'] = seed
