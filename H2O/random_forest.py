@@ -6,6 +6,8 @@ from sklearn.metrics import log_loss
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import roc_auc_score
+from sklearn.metrics import log_loss
+
 
 def prep_matrix(data):
     """
@@ -55,6 +57,28 @@ rf_grid_params = {
     'verbose': [True]
 }
 
+rf_grid_params_1 = {
+    'n_jobs': [-1],
+    'n_estimators': [150, 200,250],
+    'warm_start': [True],
+    'random_state': [0],
+    'max_depth': [6],
+    'min_samples_leaf': [2, 5, 7, 80],
+    'max_features': [10, 14, 18],
+    'verbose': [True]
+}
+
+rf_grid_params_2 = {
+    'n_jobs': [-1],
+    'n_estimators': [50, 150, 200, 300],
+    'warm_start': [True],
+    'random_state': [0],
+    'max_depth': [6],
+    'min_samples_leaf': [2,80,150,200],
+    'max_features': [7, 14, 21],
+    'verbose': [True]
+}
+
 if __name__ == '__main__':
     from pandas import read_csv
 
@@ -73,7 +97,49 @@ if __name__ == '__main__':
     print l_loss
     #0.692586716885
 
+    """
+    SEARCH 1
+    """
     # grid search
     rf = RandomForestClassifier()
     clf = GridSearchCV(rf, rf_grid_params)
     clf.fit(X, y)
+    print clf.best_estimator_
+    print clf.best_params_
+    # {'warm_start': True, 'n_jobs': -1, 'verbose': True, 'min_samples_leaf': 2, 'n_estimators': 200, 'random_state': 0,
+    #  'max_features': 10, 'max_depth': 6}
+
+    best_rf = clf.best_estimator_
+    proba_predictions = best_rf.predict_proba(X_holdout)
+    l_loss = log_loss(y_holdout, proba_predictions)
+    print l_loss
+    # 0.692491910196
+
+    """
+    SEARCH 2
+    """
+    rf = RandomForestClassifier()
+    clf = GridSearchCV(rf, rf_grid_params_1)
+    clf.fit(X, y)
+    print clf.best_estimator_
+    print clf.best_params_
+    # {'warm_start': True, 'n_jobs': -1, 'verbose': True, 'min_samples_leaf': 80, 'n_estimators': 150, 'random_state': 0,
+    # 'max_features': 14, 'max_depth': 6}
+    best_rf_1 = clf.best_estimator_
+    proba_predictions = best_rf_1.predict_proba(X_holdout)
+    l_loss = log_loss(y_holdout, proba_predictions)
+    print l_loss
+    # 0.692619310732
+
+    """
+    SEARCH 3
+    """
+    rf = RandomForestClassifier()
+    clf = GridSearchCV(rf, rf_grid_params_2)
+    clf.fit(X, y)
+    print clf.best_estimator_
+    print clf.best_params_
+    best_rf_2 = clf.best_estimator_
+    proba_predictions = best_rf_2.predict_proba(X_holdout)
+    l_loss = log_loss(y_holdout, proba_predictions)
+    print l_loss
