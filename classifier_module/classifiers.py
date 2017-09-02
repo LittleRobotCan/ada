@@ -69,6 +69,7 @@ def split_by_era(eras, n_splits):
 # TODO: test whether base models are different enough
 # DONE base model correlation low
 # TODO: use different base models ... classification, cluster, D-reduction, regression
+# TODO: determine optimal weights for base models
 # TODO: plot learning curves and determine optimal cutoff
 # TODO: convert binary response to a factor
 class base_learner():
