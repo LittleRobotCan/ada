@@ -26,7 +26,6 @@ def prep_matrix(data):
 
 gb_params_1 = {
     'random_state': 10,
-    'n_estimators': 500,
     'max_depth':  8, #should be 5-8 depending on the number of observations and predictors
     'min_samples_leaf': 50,
     'min_samples_split': 500, # should be 0.5-1% of the total observations
@@ -34,6 +33,15 @@ gb_params_1 = {
     'learning_rate':0.1,
     'max_features': 'sqrt', # general rule of thumb
     'subsample': 0.8 # commonly used start value
+}
+
+gb_params_2 = {
+    'learning_rate':0.1,
+    'n_estimators':60,
+    'max_features':'sqrt',
+    'subsample':0.8,
+    'random_state':10,
+    'verbose':True
 }
 
 if __name__ == '__main__':
@@ -71,9 +79,9 @@ if __name__ == '__main__':
     print gsearch1.best_params_, gsearch1.best_score_
     # {'n_estimators': 50} 0.51315486406
     best_gb1 = gsearch1.best_estimator_
-    proba_predictions = best_gb1.predict_proba(X_holdout)
-    l_loss = log_loss(y_holdout, proba_predictions)
-    print l_loss
+    proba_predictions1 = best_gb1.predict_proba(X_holdout)
+    l_loss1 = log_loss(y_holdout, proba_predictions1)
+    print l_loss1
     # 0.693599352255
     """
     got 50 as the optimum estimator for 0.1 learning rate
@@ -85,4 +93,11 @@ if __name__ == '__main__':
     """
     2nd search
     tweak the tree parameters
+    
     """
+    param_test2 = {'max_depth': range(5, 16, 2), 'min_samples_split': range(200, 1001, 200)}
+    gsearch2 = GridSearchCV(
+        estimator=GradientBoostingClassifier(**gb_params_2),
+        param_grid=param_test2, scoring='roc_auc', n_jobs=4, iid=False, cv=5)
+    gsearch2.fit(X, y)
+    gsearch2.best_params_, gsearch2.best_score_
