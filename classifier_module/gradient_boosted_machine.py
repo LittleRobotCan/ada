@@ -24,23 +24,15 @@ def prep_matrix(data):
     return X, y
 
 
-rf_random_params = {
-    'n_jobs': [-1],
-    'n_estimators': np.random.randint(40, 1000, 900),
-    'warm_start': [True],
-    'random_state': [0],
-    'max_depth': [6],
-    'min_samples_leaf': np.random.randint(2,500,400),
-    'max_features': np.random.randint(3,21,18),
-    'verbose': [True]
-}
-
 gb_params = {
     'random_state': 10,
     'n_estimators': 500,
-    'max_depth': 5,
-    'min_samples_leaf': 2,
-    'verbose': 0
+    'max_depth':  8, #should be 5-8 depending on the number of observations and predictors
+    'min_samples_leaf': 50,
+    'min_samples_split': 500, # should be 0.5-1% of the total observations
+    'verbose': 0,
+    'max_features': 'sqrt', # general rule of thumb
+    'subsample': 0.8 # commonly used start value
 }
 
 if __name__ == '__main__':
