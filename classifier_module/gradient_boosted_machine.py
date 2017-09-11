@@ -69,7 +69,20 @@ if __name__ == '__main__':
         param_grid=param_test1, scoring='roc_auc', n_jobs=4, iid=False, cv=5)
     gsearch1.fit(X,y)
     print gsearch1.best_params_, gsearch1.best_score_
+    # {'n_estimators': 50} 0.51315486406
     best_gb1 = gsearch1.best_estimator_
     proba_predictions = best_gb1.predict_proba(X_holdout)
     l_loss = log_loss(y_holdout, proba_predictions)
     print l_loss
+    # 0.693599352255
+    """
+    got 50 as the optimum estimator for 0.1 learning rate
+    NOTE:
+    If the value is around 20, you might want to try lowering the learning rate to 0.05 and re-run grid search
+    If the values are too high ~100, tuning the other parameters will take long time and you can try a higher learning rate
+    """
+
+    """
+    2nd search
+    tweak the tree parameters
+    """
