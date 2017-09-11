@@ -24,13 +24,14 @@ def prep_matrix(data):
     return X, y
 
 
-gb_params = {
+gb_params_1 = {
     'random_state': 10,
     'n_estimators': 500,
     'max_depth':  8, #should be 5-8 depending on the number of observations and predictors
     'min_samples_leaf': 50,
     'min_samples_split': 500, # should be 0.5-1% of the total observations
-    'verbose': 0,
+    'verbose': True,
+    'learning_rate':0.1,
     'max_features': 'sqrt', # general rule of thumb
     'subsample': 0.8 # commonly used start value
 }
@@ -46,6 +47,9 @@ if __name__ == '__main__':
     X, y = prep_matrix(data.ix[:,3:])
     X_holdout, y_holdout = prep_matrix(holdout.ix[:,3:])
 
+    """
+    base model with no tweaking
+    """
     base_gb = GradientBoostingClassifier(random_state=10)
     base_gb.fit(X, y)
     proba_predictions = base_gb.predict_proba(X_holdout)
@@ -53,3 +57,19 @@ if __name__ == '__main__':
     print l_loss
     #0.692627115819
 
+    """
+    1st seach
+    fixed the tree parameters
+    fix learning rate at 0.1
+    search for optimum # of trees between 20 to 80 in steps of 10
+    """
+    param_test1 = {'n_estimators':range(20, 81, 10)}
+    gsearch1 = GridSearchCV(
+        estimator=GradientBoostingClassifier(**gb_params_1),
+        param_grid=param_test1, scoring='roc_auc', n_jobs=4, iid=False, cv=5)
+    gsearch1.fit(X,y)
+    print gsearch1.best_params_, gsearch1.best_score_
+    best_gb1 = gsearch1.best_estimator_
+    proba_predictions = best_gb1.predict_proba(X_holdout)
+    l_loss = log_loss(y_holdout, proba_predictions)
+    print l_loss
