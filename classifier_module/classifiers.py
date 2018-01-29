@@ -5,6 +5,7 @@ from sklearn.model_selection import KFold
 from xgboost import XGBClassifier
 import pandas as pd
 from sklearn.metrics import log_loss
+from sklearn.metrics import precision_recall_fscore_support
 
 def prep_matrix(data):
     """
@@ -181,12 +182,12 @@ class single_learners():
     def __init__(self):
         rf_params = {
             'n_jobs': -1,
-            'n_estimators': 500,
+            'n_estimators': 2000,
              'warm_start': True,
              #'max_features': 0.2,
-            'max_depth': 6,
-            'min_samples_leaf': 2,
+            'max_depth': 15,
             'max_features' : 'sqrt',
+            'min_samples_leaf': 2,
             'verbose': 0
         }
 
@@ -195,7 +196,7 @@ class single_learners():
             'n_jobs': -1,
             'n_estimators':500,
             #'max_features': 0.5,
-            'max_depth': 8,
+            'max_depth': 6,
             'min_samples_leaf': 2,
             'verbose': 0
         }
@@ -232,9 +233,15 @@ class single_learners():
         base_models = {'rf': self.rf, 'et': self.et, 'ada': self.ada, 'gb': self.gb}
         model = base_models[model_name]
         model.fit(X, y)
-        proba_predictions = model.predict_proba(X_holdout)
-        l_loss = log_loss(y_holdout, proba_predictions)
-        return l_loss
+        holdout_prediction_proba = model.predict_proba(X_holdout)
+        holdout_prediction = model.predict(X_holdout)
+        training_prediction_proba = model.predict_proba(X)
+        training_prediction = model.predict(X)
+        l_loss_holdout = log_loss(y_holdout, holdout_prediction_proba)
+        l_loss_training = log_loss(y, training_prediction_proba)
+        training_scores = precision_recall_fscore_support(y, training_prediction)
+        holdout_scores = precision_recall_fscore_support(y_holdout, holdout_prediction)
+        return l_loss_holdout, l_loss_training, holdout_prediction, training_scores, holdout_scores
 
 
 if __name__ == '__main__':
@@ -292,7 +299,10 @@ if __name__ == '__main__':
     """
     single learner
     """
-    for model_name in ['gb']:
+    for model_name in ['rf']:
         single_learner = single_learners()
         log_loss = single_learner.single_learner(X, y, X_holdout, y_holdout, model_name)
         print model_name, log_loss
+
+    #0.69258
+    #0.69397
