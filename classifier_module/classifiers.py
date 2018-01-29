@@ -180,7 +180,7 @@ def evaluate(truth, predict_proba):
 
 class single_learners():
     def __init__(self):
-        rf_params = {
+        self.rf_params = {
             'n_jobs': -1,
             'n_estimators': 2000,
              'warm_start': True,
@@ -192,7 +192,7 @@ class single_learners():
         }
 
         # Extra Trees Parameters
-        et_params = {
+        self.et_params = {
             'n_jobs': -1,
             'n_estimators':500,
             #'max_features': 0.5,
@@ -202,13 +202,13 @@ class single_learners():
         }
 
         # AdaBoost parameters
-        ada_params = {
+        self.ada_params = {
             'n_estimators': 500,
             'learning_rate' : 0.75
         }
 
         # Gradient Boosting parameters
-        gb_params = {
+        self.gb_params = {
             'n_estimators': 500,
              #'max_features': 0.2,
             'max_depth': 5,
@@ -217,17 +217,17 @@ class single_learners():
         }
 
         # Support Vector Classifier parameters
-        svc_params = {
+        self.svc_params = {
             'kernel' : 'linear',
             'C' : 0.025
             }
 
         SEED = 0 # for reproducibility
-        self.rf = SKlearnHelper(clf=RandomForestClassifier, seed=SEED, params=rf_params)
-        self.et = SKlearnHelper(clf=ExtraTreesClassifier, seed=SEED, params=et_params)
-        self.ada = SKlearnHelper(clf=AdaBoostClassifier, seed=SEED, params=ada_params)
-        self.gb = SKlearnHelper(clf=GradientBoostingClassifier, seed=SEED, params=gb_params)
-        self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=svc_params)
+        self.rf = SKlearnHelper(clf=RandomForestClassifier, seed=SEED, params=self.rf_params)
+        self.et = SKlearnHelper(clf=ExtraTreesClassifier, seed=SEED, params=self.et_params)
+        self.ada = SKlearnHelper(clf=AdaBoostClassifier, seed=SEED, params=self.ada_params)
+        self.gb = SKlearnHelper(clf=GradientBoostingClassifier, seed=SEED, params=self.gb_params)
+        self.svc = SKlearnHelper(clf=SVC, seed=SEED, params=self.svc_params)
 
     def single_learner(self, X, y, X_holdout, y_holdout, model_name):
         base_models = {'rf': self.rf, 'et': self.et, 'ada': self.ada, 'gb': self.gb}
@@ -301,8 +301,15 @@ if __name__ == '__main__':
     """
     for model_name in ['rf']:
         single_learner = single_learners()
-        log_loss = single_learner.single_learner(X, y, X_holdout, y_holdout, model_name)
-        print model_name, log_loss
+        l_loss_holdout, l_loss_training, holdout_prediction, training_scores, holdout_scores = single_learner.single_learner(X, y, X_holdout, y_holdout, model_name)
+        scores = [item for sublist in training_scores for item in sublist] + [item for sublist in holdout_scores for item in sublist]
+        l_losses = [l_loss_training, l_loss_holdout]
+        params = [single_learner.rf_params['n_estimators'], single_learner.rf_params['max_depth'],
+                  single_learner.rf_params['max_features'], single_learner.rf_params['min_samples_leaf']]
+        output_row = ['rf'] + params + l_losses + scores
+        logger = open('output/single_rf_model.csv', 'a')
+        logger.write(output_row)
+        logger.close()
 
     #0.69258
     #0.69397
