@@ -313,3 +313,148 @@ if __name__ == '__main__':
 
     #0.69258
     #0.69397
+
+
+# count then print
+def printer(n):
+    if n==0:
+        return
+    else:
+        print n
+        n = n-1
+        printer(n)
+
+
+test = [1,2,1,2,1,4,2,2,3,4]
+counts = [(i,test.count(i)) for i in test]
+
+def printer(l):
+    length = len(l)
+    j = 0
+    def _printer(_l,j,length):
+        if j == length:
+            return
+        else:
+            print str(_l[j][0]) + ':' + str(_l[j])[1]
+            j += 1
+            _printer(_l,j,length)
+    _printer(l, j, length)
+    return
+
+# anagram checker
+a = 'GOD'
+b = 'DOG'
+
+
+def pair_sum(arr, k):
+    if len(arr) < 2:
+        return
+
+    # Sets for tracking
+    seen = set()
+    output = set()
+
+    # For every number in array
+    for num in arr:
+
+        # Set target difference
+        target = k - num
+        print target
+
+        # Add it to set if target hasn't been seen
+        if target not in seen:
+            print "not seen"
+            seen.add(num)
+
+        else:
+            # Add a tuple with the corresponding pair
+            output.add((min(num, target), max(num, target)))
+
+    # FOR TESTING
+    return output, seen
+
+pair_sum([1,2,3,2,3,5,4,1],5)
+
+
+def anagram_checker(a,b):
+    if len(a)!=len(b):
+        return False
+    a_lst = [_a.lower for _a in list(a)]
+    b_lst = [_b.lower for _b in list(b)]
+    unique_letters = set(a_lst + b_lst)
+    for l in unique_letters:
+        if a_lst.count(l) != b_lst.count(l):
+            return False
+    return True
+
+
+# output allp
+
+
+
+# Python program to for tree traversals
+
+# A class that represents an individual node in a
+# Binary Tree
+class Node:
+    def __init__(self, key):
+        self.left = None
+        self.right = None
+        self.val = key
+
+
+# A function to do inorder tree traversal
+def printInorder(root):
+    if root:
+        # First recur on left child
+        printInorder(root.left)
+
+        # then print the data of node
+        print(root.val),
+
+        # now recur on right child
+        printInorder(root.right)
+
+
+# A function to do postorder tree traversal
+def printPostorder(root):
+    if root:
+        # First recur on left child
+        printPostorder(root.left)
+
+        # the recur on right child
+        printPostorder(root.right)
+
+        # now print the data of node
+        print(root.val),
+
+
+# A function to do postorder tree traversal
+def printPreorder(root):
+    if root:
+        # First print the data of node
+        print(root.val),
+
+        # Then recur on left child
+        printPreorder(root.left)
+
+        # Finally recur on right child
+        printPreorder(root.right)
+
+
+# Driver code
+root = Node(1)
+root.left = Node(2)
+root.right = Node(3)
+root.left.left = Node(4)
+root.left.right = Node(5)
+print "Preorder traversal of binary tree is"
+printPreorder(root)
+
+print "\nInorder traversal of binary tree is"
+printInorder(root)
+
+print "\nPostorder traversal of binary tree is"
+printPostorder(root)
+
+
