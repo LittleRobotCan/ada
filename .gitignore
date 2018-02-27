@@ -1,0 +1,7 @@
+data/*
+.idea/*
+plots/
+output/
+TEMP.py
+*.pyc
+.DS_Store
